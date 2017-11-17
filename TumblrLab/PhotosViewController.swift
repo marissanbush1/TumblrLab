@@ -28,7 +28,7 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         return cell
     }
     
-
+    
     var posts: [[String: Any]] = []
     
     @IBOutlet weak var photosTableView: UITableView!
@@ -38,6 +38,7 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         super.viewDidLoad()
         photosTableView.delegate = self
         photosTableView.dataSource = self
+        photosTableView.rowHeight = 200
         
         let url = URL(string: "https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV")!
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
