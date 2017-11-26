@@ -9,7 +9,7 @@
 import UIKit
 import AlamofireImage
 
-class PhotosViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class PhotosViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count
     }
@@ -27,6 +27,9 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
         cell.photoImageView.af_setImage(withURL: url!)
         return cell
     }
+    
+    
+    
     
     
     var posts: [[String: Any]] = []
@@ -64,21 +67,59 @@ class PhotosViewController: UIViewController, UITableViewDataSource, UITableView
 
         // Do any additional setup after loading the view.
     }
-
+    var isMoreDataLoading = false
+    
+    func loadMoreData() {
+        
+        // ... Create the NSURLRequest (myRequest) ...
+        let url = URL(string: "https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV")!
+        
+        // Configure session so that completion handler is executed on main UI thread
+        let session = URLSession(configuration: URLSessionConfiguration.default,
+                                 delegate:nil,
+                                 delegateQueue:OperationQueue.main
+        )
+        let task = session.dataTask(with: url) { (data, response, error) in
+            
+            // Update flag
+            self.isMoreDataLoading = false
+            
+            // ... Use the new data to update the data source ...
+            
+            // Reload the tableView now that there is new data
+            self.photosTableView.reloadData()
+        }
+        task.resume()
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if (!isMoreDataLoading) {
+            // Calculate the position of one screen length before the bottom of the results
+            let scrollViewContentHeight = photosTableView.contentSize.height
+            let scrollOffsetThreshold = scrollViewContentHeight - photosTableView.bounds.size.height
+            
+            // When the user has scrolled past the threshold, start requesting
+            if(scrollView.contentOffset.y > scrollOffsetThreshold && photosTableView.isDragging) {
+                
+                isMoreDataLoading = true
+                
+                // Code to load more results
+                loadMoreData()
+            }
+        }
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        let detailViewController = segue.destination as! DetailViewController
+        let cell = sender as! PhotoCell
+        detailViewController.photo = cell.photoImageView.image
+        
+        
     }
-    */
 
 }
